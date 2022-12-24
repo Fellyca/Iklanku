@@ -1,8 +1,10 @@
-package com.if5b.iklanku;
+package com.if5b.iklanku.Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.if5b.iklanku.R;
 
 public class MainActivity extends AppCompatActivity {
 
