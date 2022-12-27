@@ -114,10 +114,10 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_edit:
-                        Intent intent = new Intent(MainActivity.this, UpdatePostActivity.class);
-                        intent.putExtra("EXTRA_DATA", post);
-                        startActivity(intent);
-                        return true;
+//                        Intent intent = new Intent(MainActivity.this, UpdatePostActivity.class);
+//                        intent.putExtra("EXTRA_DATA", post);
+//                        startActivity(intent);
+//                        return true;
                     case R.id.action_delete:
                         int id = post.getId();
                         AlertDialog.Builder alerDialogBuilder = new AlertDialog.Builder(MainActivity.this);
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                         alerDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
-                                deletePost(id);
+//                                deletePost(id);
                             }
                         });
                         alerDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -146,20 +146,20 @@ public class MainActivity extends AppCompatActivity {
         });
         popupMenu.show();;
 
-    public boolean onOptionsMenu (Menu menu){
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return  true;
-    }
+//    public boolean onOptionsMenu (Menu menu){
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return  true;
+//    }
 
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        if(id == R.id.action_logout){
-            Utilities.clearUser(this);
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        int id = item.getItemId();
+//
+//        if(id == R.id.action_logout){
+//            Utilities.clearUser(this);
+//            Intent intent = new Intent(this, LoginActivity.class);
+//            startActivity(intent);
+//            finish();
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 }

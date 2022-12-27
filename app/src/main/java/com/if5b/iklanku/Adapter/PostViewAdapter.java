@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+
+import com.if5b.iklanku.API.ItemLongClicListener;
 import com.if5b.iklanku.Model.Post;
 import com.if5b.iklanku.R;
 
@@ -17,7 +19,7 @@ import java.util.List;
 
 public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHolder> {
     private List<Post> data = new ArrayList<>();
-    private AdapterView.OnItemLongClickListener<Post> itemLongClickListener;
+    private ItemLongClicListener<Post> itemLongClickListener;
 
     public void setData(List<Post> data) {
         this.data = data;
