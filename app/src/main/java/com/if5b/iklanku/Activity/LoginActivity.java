@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     private void login(String username ,String password){
         showProgressBar();
         APIServices api = Utilities.getRetrofit().create(APIServices.class);
-        Call<ValueNoData> call = api.register("", username, password);
+        Call<ValueNoData> call = api.login("", username, password);
         call.enqueue(new Callback<ValueNoData>() {
             @Override
             public void onResponse(Call<ValueNoData> call, Response<ValueNoData> response) {
@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                     String message = response.body().getMessage();
                     if (succes == 1){
                         Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+                        Utilities.setValue(LoginActivity.this, "xUsername", username);
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();

@@ -1,5 +1,6 @@
 package com.if5b.iklanku.API;
 
+import com.if5b.iklanku.Model.Post;
 import com.if5b.iklanku.Model.ValueData;
 import com.if5b.iklanku.Model.ValueNoData;
 
@@ -23,13 +24,21 @@ public interface APIServices {
 
     @POST("getAllPost")
     @FormUrlEncoded
-    Call<ValueData<POST>> getPost(@Field("key") String key);
+    Call<ValueData<Post>> getPost(@Field("key") String key);
+
+    @POST("insertPost")
+    @FormUrlEncoded
+    Call<ValueNoData> insertPost(@Field("key") String key,
+                                 @Field("username") String username,
+                                 @Field("judul") String judul,
+                                 @Field("image") String image);
 
     @POST("updatePost")
     @FormUrlEncoded
     Call<ValueNoData> updatePost(@Field("key") String key,
                                  @Field("id") int id,
-                                 @Field("content") String content);
+                                 @Field("judul") String judul,
+                                 @Field("image") String image);
 
     @POST("deletePost")
     @FormUrlEncoded

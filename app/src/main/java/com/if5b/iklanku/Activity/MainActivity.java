@@ -33,15 +33,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PostViewAdapter.OnItemLongClickListener {
     private ActivityMainBinding binding;
     private PostViewAdapter postViewAdapter;
     private List<Post> data = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!Utilities.checkValue(MainActivity.this, "xUsername")){
+        if (!Utilities.checkValue(MainActivity.this, "xUsername")) {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
@@ -55,111 +56,138 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         getAllPost();
     }
-    private void  showProgressBar(){binding.progressBar.setVisibility(View.GONE);
-    }
-    private void  hideProggressBar(){
+
+    private void showProgressBar() {
         binding.progressBar.setVisibility(View.GONE);
     }
 
-    private void getAllPost(){
+    private void hideProggressBar() {
+        binding.progressBar.setVisibility(View.GONE);
+    }
+
+    private void getAllPost() {
         showProgressBar();
         APIServices api = Utilities.getRetrofit().create(APIServices.class);
-        api.getPost(Utilities.API_KEY).enqueue(new Callback<ValueData<Post>>()
-        {
-            @RequiresApi(api = Build.VERSION_CODES.M)
+        api.getPost(Utilities.API_KEY).enqueue(new Callback<ValueData<Post>>() {
             @Override
-            public void onResponse(Call<ValueData<Post>> call, Response<ValueData<Post>> response)
-            {
-                if (response.code() == 200)
-                {
+            public void onResponse(Call<ValueData<Post>> call, Response<ValueData<Post>> response) {
+                if (response.code() == 200) {
                     int success = response.body().getSuccess();
-                    if (success == 1)
-                    {
+                    if (success == 1) {
                         data = response.body().getData();
-                        postViewAdapter.setData(data, MainActivity.this::onItemPostLongClick);
+                        postViewAdapter.setData(data, MainActivity.this);
+                        Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                    } else {
                         Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                    else
-                    {
-                        Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-                else
-                {
+                } else {
                     Toast.makeText(MainActivity.this, "Response Code : " + response.code(), Toast.LENGTH_SHORT).show();
                 }
                 hideProggressBar();
             }
 
             @Override
-            public void onFailure(Call<ValueData<Post>> call, Throwable t)
-            {
+            public void onFailure(Call<ValueData<Post>> call, Throwable t) {
                 hideProggressBar();
                 Toast.makeText(MainActivity.this, "Error : " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private void onItemPostLongClick(View view, Post post, int position) {
-        PopupMenu popupMenu = new PopupMenu(this, view);
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu){
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return  true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_logout){
+            Utilities.clearUser(this);
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemLongClick(View v, int position) {
+        PopupMenu popupMenu = new PopupMenu(MainActivity.this, v);
         popupMenu.inflate(R.menu.menu_popup);
-        popupMenu.setGravity(Gravity.RIGHT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            popupMenu.setGravity(Gravity.RIGHT);
+        }
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_edit:
-//                        Intent intent = new Intent(MainActivity.this, UpdatePostActivity.class);
-//                        intent.putExtra("EXTRA_DATA", post);
-//                        startActivity(intent);
-//                        return true;
+                        Intent intent = new Intent(MainActivity.this, UpdatePostActivity.class);
+                        intent.putExtra("EXTRA_DATA", String.valueOf(data.get(position)));
+                        startActivity(intent);
+                        return true;
                     case R.id.action_delete:
-                        int id = post.getId();
-                        AlertDialog.Builder alerDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                        alerDialogBuilder.setTitle("");
-                        alerDialogBuilder.setMessage("");
-                        alerDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        int id = (data.get(position).getId());
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                        alertDialogBuilder.setTitle("Konfirmasi");
+                        alertDialogBuilder.setMessage("Yakin ingin menghapus post '" + data.get(position).getJudul() + "' ?");
+                        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int which) {
-//                                deletePost(id);
+                            public void onClick(DialogInterface dialog, int which) {
+                                deletePost(id);
                             }
                         });
-                        alerDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int which) {
-                                dialogInterface.cancel();
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
                             }
                         });
-                        AlertDialog alertDialog = alerDialogBuilder.create();
+                        AlertDialog alertDialog = alertDialogBuilder.create();
                         alertDialog.show();
                         return true;
                     default:
                         return false;
-
                 }
             }
         });
-        popupMenu.show();;
+        popupMenu.show();
 
-//    public boolean onOptionsMenu (Menu menu){
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return  true;
-//    }
+    }
 
-//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-//        int id = item.getItemId();
-//
-//        if(id == R.id.action_logout){
-//            Utilities.clearUser(this);
-//            Intent intent = new Intent(this, LoginActivity.class);
-//            startActivity(intent);
-//            finish();
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
+    private void deletePost(int id) {
+        APIServices api = Utilities.getRetrofit().create(APIServices.class);
+        Call<ValueNoData> call = api.deletePost(Utilities.API_KEY, id);
+        call.enqueue(new Callback<ValueNoData>() {
+            @Override
+            public void onResponse(Call<ValueNoData> call, Response<ValueNoData> response) {
+                if(response.code() == 200){
+                    int success = response.body().getSuccess();
+                    String  message = response.body().getMessage();
+                    if (success == 1){
+                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                        getAllPost();
+                    }else{
+                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "Response "+ response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ValueNoData> call, Throwable t) {
+                System.out.println("Retrofit Error : "+ t.getMessage());
+                Toast.makeText(MainActivity.this, "Retrofit Error : "+t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }

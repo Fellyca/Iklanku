@@ -7,7 +7,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class Post {
     private int id;
-    private String content;
+    private String image;
+    private String judul;
     @SerializedName("user_id")
     private String userId;
     @SerializedName("created_date")
@@ -21,7 +22,8 @@ public class Post {
 
     protected Post(Parcel in) {
         id = in.readInt();
-        content = in.readString();
+        image = in.readString();
+        judul = in.readString();
         userId= in.readString();
         createdDate = in.readString();
         modifiedDate = in.readString();
@@ -30,7 +32,8 @@ public class Post {
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
-        dest.writeString(content);
+        dest.writeString(image);
+        dest.writeString(judul);
         dest.writeString(userId);
         dest.writeString(createdDate);
         dest.writeString(modifiedDate);
@@ -61,12 +64,20 @@ public class Post {
         this.id = id;
     }
 
-    public String getContent() {
-        return content;
+    public String getImage() {
+        return image;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getJudul() {
+        return judul;
+    }
+
+    public void setJudul(String judul) {
+        this.judul = judul;
     }
 
     public String getUserId() {
