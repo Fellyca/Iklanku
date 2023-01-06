@@ -1,5 +1,6 @@
 package com.if5b.iklanku.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,8 +9,15 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.if5b.iklanku.API.APIServices;
 import com.if5b.iklanku.Model.ValueNoData;
+import com.if5b.iklanku.User;
 import com.if5b.iklanku.Utils.Utilities;
 import com.if5b.iklanku.databinding.ActivityRegisterBinding;
 
@@ -20,10 +28,17 @@ import retrofit2.Response;
 public class RegisterActivity extends AppCompatActivity {
 
     private ActivityRegisterBinding binding;
+    private FirebaseAuth mAuth;
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference mRoot, mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance();
+        mRoot = mDatabase.getReference();
 
         binding = ActivityRegisterBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -32,6 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String username = binding.etUsername.getText().toString();
+                String email = binding.etEmail.getText().toString();
                 String password = binding.etPassword.getText().toString();
                 String kF = binding.etKonfirmasiPassword.getText().toString();
 
@@ -39,6 +55,10 @@ public class RegisterActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(username)){
                     bolehRegister = false;
                     binding.etUsername.setError("Username tidak boleh kosong!");
+                }
+                if (TextUtils.isEmpty(email)){
+                    bolehRegister = false;
+                    binding.etUsername.setError("Email tidak boleh kosong!");
                 }
                 if (TextUtils.isEmpty(password)){
                     bolehRegister = false;
@@ -59,6 +79,25 @@ public class RegisterActivity extends AppCompatActivity {
                 if (bolehRegister) {
                     register(username, password);
                 }
+
+                showProgressBar();
+
+                mAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                hideProgressBar();
+                                if (task.isSuccessful()){
+                                    Toast.makeText(RegisterActivity.this, "Register sukses!", Toast.LENGTH_SHORT).show();
+                                    User user = new User(email, username);
+                                    String userId = task.getResult().getUser().getUid();
+                                    mRef = mRoot.child("users").child(userId);
+                                    mRef.setValue(user);
+                                }else{
+                                    Toast.makeText(RegisterActivity.this, "Register gagal", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
             }
         });
 

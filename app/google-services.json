@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "976649413253",
+    "project_id": "iklanku-4115f",
+    "storage_bucket": "iklanku-4115f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976649413253:android:7136193da4563967eb7fec",
+        "android_client_info": {
+          "package_name": "com.if5b.iklanku"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "976649413253-ikeldngabdv9cklpr292i1njlouojbmp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZCTqPRDiwGNWCAaVYi3bW6v3udGgydiE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "976649413253-ikeldngabdv9cklpr292i1njlouojbmp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
