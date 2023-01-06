@@ -1,5 +1,6 @@
 package com.if5b.iklanku.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,6 +9,12 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.if5b.iklanku.API.APIServices;
 import com.if5b.iklanku.Model.ValueNoData;
 import com.if5b.iklanku.Utils.Utilities;
@@ -20,6 +27,9 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding b;
+    private FirebaseAuth mAuth;
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference mRoot, mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,15 +38,24 @@ public class LoginActivity extends AppCompatActivity {
         b = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance();
+        mRoot = mDatabase.getReference();
+
         b.btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 String username = b.etUsername.getText().toString();
+                String email = b.etEmail.getText().toString();
                 String password = b.etPassword.getText().toString();
 
                 boolean bolehLogin = true;
 
+                if (TextUtils.isEmpty(email)){
+                    bolehLogin = false;
+                    b.etEmail.setError("Email tidak boleh kosong!");
+                }
                 if (TextUtils.isEmpty(username)){
                     bolehLogin = false;
                     b.etUsername.setError("Username tidak boleh kosong!");
@@ -45,6 +64,24 @@ public class LoginActivity extends AppCompatActivity {
                     bolehLogin = false;
                     b.etPassword.setError("Password tidak boleh kosong!");
                 }
+
+                hideProgressBar();
+
+                mAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                hideProgressBar();
+                                if(task.isSuccessful()){
+                                    Toast.makeText(LoginActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }else{
+                                    Toast.makeText(LoginActivity.this, "Login gagal!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                 if (bolehLogin) {
                     login(username, password);
                 }
@@ -54,6 +91,15 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        b.btnResetpassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, ResetPasswordActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -74,9 +120,6 @@ public class LoginActivity extends AppCompatActivity {
                     if (succes == 1){
                         Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                         Utilities.setValue(LoginActivity.this, "xUsername", username);
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
                     }else {
                         Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                     }

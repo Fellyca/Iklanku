@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.if5b.iklanku.API.APIServices;
 import com.if5b.iklanku.Model.ValueData;
 import com.if5b.iklanku.Model.ValueNoData;
@@ -38,17 +39,26 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
     private PostViewAdapter postViewAdapter;
     private List<Post> data = new ArrayList<>();
 
+    private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mAuth = FirebaseAuth.getInstance();
         if (!Utilities.checkValue(MainActivity.this, "xUsername")) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        if(mAuth.getCurrentUser() == null){
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         }
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        mAuth = FirebaseAuth.getInstance();
 
         postViewAdapter = new PostViewAdapter();
         binding.rvPost.setLayoutManager(new LinearLayoutManager(this));
@@ -120,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
 
         if(id == R.id.action_logout){
             Utilities.clearUser(this);
+            mAuth.signOut();
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish();

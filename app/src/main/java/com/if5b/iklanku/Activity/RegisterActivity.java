@@ -93,6 +93,9 @@ public class RegisterActivity extends AppCompatActivity {
                                     String userId = task.getResult().getUser().getUid();
                                     mRef = mRoot.child("users").child(userId);
                                     mRef.setValue(user);
+                                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
                                 }else{
                                     Toast.makeText(RegisterActivity.this, "Register gagal", Toast.LENGTH_SHORT).show();
                                 }
@@ -105,6 +108,15 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        binding.btnResetpassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RegisterActivity.this, ResetPasswordActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -125,9 +137,6 @@ public class RegisterActivity extends AppCompatActivity {
                     if (succes == 1){
                         Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_SHORT).show();
                         Utilities.setValue(RegisterActivity.this, "xUsername", username);
-                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
                     }else {
                         Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_SHORT).show();
                     }
