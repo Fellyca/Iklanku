@@ -75,7 +75,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void register(String username, String password) {
         showProgressBar();
         APIServices api = Utilities.getRetrofit().create(APIServices.class);
-        Call<ValueNoData> call = api.register("", username, password);
+        Call<ValueNoData> call = api.register(Utilities.API_KEY, username, password);
         call.enqueue(new Callback<ValueNoData>() {
             @Override
             public void onResponse(Call<ValueNoData> call, Response<ValueNoData> response) {

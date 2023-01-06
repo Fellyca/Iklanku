@@ -53,6 +53,14 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
         postViewAdapter = new PostViewAdapter();
         binding.rvPost.setLayoutManager(new LinearLayoutManager(this));
         binding.rvPost.setAdapter(postViewAdapter);
+
+        binding.fabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AddPostActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -89,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
                 }
                 hideProggressBar();
             }
+
+
 
             @Override
             public void onFailure(Call<ValueData<Post>> call, Throwable t) {

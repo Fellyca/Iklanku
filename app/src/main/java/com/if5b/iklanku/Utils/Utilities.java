@@ -8,8 +8,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Utilities {
     private static final String PREFERENCE_FILE_KEY ="myAppPreference";
-    private  static final  String BASE_URL = "https://myiklan.000webhostapp.com/laravel/api.php/userController/";
-    public static final  String API_KEY = "Jqr6xuns091202";
+    private  static final  String BASE_URL = "https://projectpab.000webhostapp.com/iklan/index.php/MobileControl/";
+    public static final  String API_KEY = "iklanaja";
     private static Retrofit retrofit;
 
     public  static  Retrofit getRetrofit(){

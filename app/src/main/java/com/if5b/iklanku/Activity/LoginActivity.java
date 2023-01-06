@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     private void login(String username ,String password){
         showProgressBar();
         APIServices api = Utilities.getRetrofit().create(APIServices.class);
-        Call<ValueNoData> call = api.login("", username, password);
+        Call<ValueNoData> call = api.login(Utilities.API_KEY, username, password);
         call.enqueue(new Callback<ValueNoData>() {
             @Override
             public void onResponse(Call<ValueNoData> call, Response<ValueNoData> response) {
