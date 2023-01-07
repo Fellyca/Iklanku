@@ -1,14 +1,25 @@
 package com.if5b.iklanku.Activity;
 
+import android.app.appsearch.StorageInfo;
 import  android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,14 +27,24 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.amulyakhare.textdrawable.util.ColorGenerator;
+import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.firebase.ui.database.SnapshotParser;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.if5b.iklanku.API.APIServices;
 import com.if5b.iklanku.IklanViewHolder;
 import com.if5b.iklanku.Model.ChatMessage;
@@ -38,6 +59,7 @@ import com.if5b.iklanku.databinding.ActivityMainBinding;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,6 +79,15 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
 
     private DatabaseReference mRoot, mRef;
     private FirebaseRecyclerAdapter<ChatMessage, IklanViewHolder> mFirebaseAdapter;
+    private String userId;
+
+    private RecyclerView rvChat;
+    private LinearLayoutManager mLinearLayoutManager;
+    private ProgressBar progressBar;
+    private Button btnSend;
+    private EditText etMessage;
+    private ImageView ivAddMessage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +122,137 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 mUsername = "Anonymous";
+            }
+        });
+
+//        rvChat = findViewById(R.id.rv_chat);
+//        progressBar = findViewById(R.id.progressBar);
+//        etMessage = findViewById(R.id.et_message);
+//        ivAddMessage = findViewById(R.id.iv_add_message);
+//        btnSend = findViewById(R.id.btn_send);
+
+        mLinearLayoutManager = new LinearLayoutManager(MainActivity.this);
+        mLinearLayoutManager.setStackFromEnd(true);
+        rvChat.setLayoutManager(mLinearLayoutManager);
+
+        SnapshotParser<ChatMessage> parser = new SnapshotParser<ChatMessage>() {
+            @NonNull
+            @Override
+            public ChatMessage parseSnapshot(@NonNull DataSnapshot snapshot) {
+                ChatMessage chatMessage = snapshot.getValue(ChatMessage.class);
+                if (chatMessage != null) {
+                    chatMessage.setId(snapshot.getKey());
+                }
+                return chatMessage;
+            }
+        };
+        mRef = mRoot.child("message");
+        FirebaseRecyclerOptions<ChatMessage> options = new FirebaseRecyclerOptions.Builder<ChatMessage>()
+                .setQuery(mRef, parser)
+                .build();
+
+        mFirebaseAdapter = new FirebaseRecyclerAdapter<ChatMessage, IklanViewHolder>(options) {
+            @Override
+            protected void onBindViewHolder(@NonNull IklanViewHolder holder, int position, @NonNull ChatMessage model) {
+                progressBar.setVisibility(View.INVISIBLE);
+                if (model.getText() != null) {
+                    holder.tvMessage.setText(model.getText());
+                    holder.tvMessage.setVisibility(View.VISIBLE);
+                    holder.tvMessage.setVisibility(View.GONE);
+                } else if (model.getImageUrl() != null) {
+                    String imageURL = model.getImageUrl();
+                    if (imageURL.startsWith("gs://")) {
+                        StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(imageURL);
+                        storageReference.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    String downloadUrl = task.getResult().toString();
+                                    Glide.with(holder.ivMessage.getContext())
+                                            .load(downloadUrl)
+                                            .into(holder.ivMessage);
+                                } else {
+                                    Log.w(TAG, "Getting Download url failed !", task.getException());
+                                }
+
+                            }
+                        });
+                    } else {
+                        Glide.with(holder.ivMessage.getContext())
+                                .load(model.getImageUrl())
+                                .into(holder.ivMessage);
+                    }
+                    holder.ivMessage.setVisibility(View.VISIBLE);
+                    holder.tvMessage.setVisibility(View.GONE);
+
+                }
+                holder.tvMes.setText(model.getName());
+
+                ColorGenerator colorGenerator = ColorGenerator.MATERIAL;
+                getInitialName(mUsername.toUpperCase());
+                TextDrawable textDrawable = TextDrawable.builder()
+                        .beginConfig()
+                        .width(50)
+                        .height(50)
+                        .endConfig()
+                        .buildRound(getInitialName(mUsername.toUpperCase()), colorGenerator.getColor(mAuth.getCurrentUser().getEmail()));
+
+                holder.ivMes.setImageDrawable(textDrawable);
+            }
+
+            @NonNull
+            @Override
+            public IklanViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                return new IklanViewHolder(inflater.inflate(R.layout.item_, parent, false));
+            }
+        };
+
+        mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                int chatMessageCount = mFirebaseAdapter.getItemCount();
+                int lastVisiblePosition = mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
+
+                if (lastVisiblePosition == -1 ||
+                        (positionStart >= (chatMessageCount - 1) &&
+                                lastVisiblePosition == (positionStart - 1))) {
+                    rvChat.scrollToPosition(positionStart);
+                }
+            }
+        });
+
+        rvChat.setAdapter(mFirebaseAdapter);
+
+        etMessage.addTextChangedListener(new TextWatcher() {  // NAHHHHHHHHHHHH 1.12.52
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(charSequence.toString().trim().length() > 0){
+                    btnSend.setEnabled(true);
+                }else {
+                    btnSend.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ChatMessage chatMessage = new ChatMessage(etMessage.getText().toString(),
+                        mUsername,
+                        null);
+                mRoot.child("messages").push().setValue(chatMessage);
+
             }
         });
 
@@ -246,5 +408,15 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
                 Toast.makeText(MainActivity.this, "Retrofit Error : "+t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private String getInitialName(String fullname){
+        int firstSpace = fullname.indexOf(" ");
+        String firstName = fullname.substring(0, firstSpace);
+        int lastSpace = fullname.lastIndexOf(" ");
+        String middleName = fullname.substring(firstSpace + 1,  lastSpace);
+        String lastName = fullname.substring(lastSpace + 1);
+
+        return "" + firstName.charAt(0) + lastName.charAt(0);
     }
 }
