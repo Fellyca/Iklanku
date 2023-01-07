@@ -1,6 +1,6 @@
 package com.if5b.iklanku.Activity;
 
-import android.content.DialogInterface;
+import  android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,13 +17,22 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.if5b.iklanku.API.APIServices;
+import com.if5b.iklanku.IklanViewHolder;
+import com.if5b.iklanku.Model.ChatMessage;
 import com.if5b.iklanku.Model.ValueData;
 import com.if5b.iklanku.Model.ValueNoData;
 import com.if5b.iklanku.Adapter.PostViewAdapter;
 import com.if5b.iklanku.Model.Post;
 import com.if5b.iklanku.R;
+import com.if5b.iklanku.User;
 import com.if5b.iklanku.Utils.Utilities;
 import com.if5b.iklanku.databinding.ActivityMainBinding;
 
@@ -40,6 +49,15 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
     private List<Post> data = new ArrayList<>();
 
     private FirebaseAuth mAuth;
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    private String mUsername;
+    private static final int REQUEST_IMAGE = 2;
+    private static final String LOADING_IMAGE_URL = "";
+
+    private DatabaseReference mRoot, mRef;
+    private FirebaseRecyclerAdapter<ChatMessage, IklanViewHolder> mFirebaseAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,9 +78,27 @@ public class MainActivity extends AppCompatActivity implements PostViewAdapter.O
 
         mAuth = FirebaseAuth.getInstance();
 
+        String userId = mAuth.getCurrentUser().getUid();
+        mRoot = FirebaseDatabase.getInstance().getReference();
+        mRef = mRoot.child("users_id").child(userId);
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                User user = snapshot.getValue(User.class);
+                mUsername = user.getUsername();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                mUsername = "Anonymous";
+            }
+        });
+
         postViewAdapter = new PostViewAdapter();
         binding.rvPost.setLayoutManager(new LinearLayoutManager(this));
         binding.rvPost.setAdapter(postViewAdapter);
+
+        
 
         binding.fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
