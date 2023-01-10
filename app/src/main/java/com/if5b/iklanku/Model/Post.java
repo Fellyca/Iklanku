@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Post {
+public class Post implements Parcelable {
     private int id;
     private String image;
     private String judul;

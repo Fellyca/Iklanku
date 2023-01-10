@@ -37,8 +37,7 @@ public interface APIServices {
     @FormUrlEncoded
     Call<ValueNoData> updatePost(@Field("key") String key,
                                  @Field("id") int id,
-                                 @Field("judul") String judul,
-                                 @Field("image") String image);
+                                 @Field("judul") String judul);
 
     @POST("deletePost")
     @FormUrlEncoded

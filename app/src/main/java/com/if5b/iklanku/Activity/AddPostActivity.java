@@ -31,6 +31,10 @@ public class AddPostActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String judul = binding.etJudul.getText().toString();
+//                String tv4 = binding.tv4.getText().toString();
+//                Context context = AddPostActivity.this;
+//                String path = getPath(context, filepath);
+
                 boolean bolehPost = true;
 
                 if(TextUtils.isEmpty(judul)){
@@ -39,12 +43,11 @@ public class AddPostActivity extends AppCompatActivity {
                 }
 
                 if (bolehPost){
-                    addPost(Utilities.getValue(AddPostActivity.this, "xUsername"), judul, "");
+                    addPost(Utilities.getValue(AddPostActivity.this, "xUsername"), judul, UploadImageActivity.image);
                 }
-
-                Intent intent = new Intent(AddPostActivity.this, UploadImageActivity.class);
+                Intent intent = new Intent(AddPostActivity.this, MainActivity.class);
                 startActivity(intent);
-                finish();
+                finishAffinity();
             }
         });
     }
@@ -54,6 +57,8 @@ public class AddPostActivity extends AppCompatActivity {
         APIServices api = Utilities.getRetrofit().create(APIServices.class);
         Call<ValueNoData> call = api.insertPost(Utilities.API_KEY, username, judul, image);
         call.enqueue(new Callback<ValueNoData>() {
+            //untuk 2 baris diatas
+            //api.insertPost(Utilities.API_KEY, username, content).enqueue(new Callback<ValueNoData>(){
             @Override
             public void onResponse(Call<ValueNoData> call, Response<ValueNoData> response) {
                 if (response.code() == 200){
@@ -80,4 +85,5 @@ public class AddPostActivity extends AppCompatActivity {
             }
         });
     }
+
 }

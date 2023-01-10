@@ -11,8 +11,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -27,6 +30,7 @@ public class UploadImageActivity extends AppCompatActivity {
     Uri imageUri;
     StorageReference storageReference;
     ProgressDialog progressDialog;
+    public static String image = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,27 +61,54 @@ public class UploadImageActivity extends AppCompatActivity {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.CANADA);
         Date now = new Date();
         String fileName = formatter.format(now);
-        storageReference = FirebaseStorage.getInstance().getReference("images/"+fileName);
+        storageReference = FirebaseStorage.getInstance().getReference(fileName);
 
-        storageReference.putFile(imageUri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
+
+        storageReference.putFile(imageUri).addOnCompleteListener(UploadImageActivity.this, new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        binding.ivImage.setImageURI(null);
-                        Toast.makeText(UploadImageActivity.this, "Upload Berhasil", Toast.LENGTH_SHORT).show();
-                        if(progressDialog.isShowing())
-                            progressDialog.dismiss();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        if (progressDialog.isShowing())
-                            progressDialog.dismiss();
-
-                        Toast.makeText(UploadImageActivity.this, "Upload gagal", Toast.LENGTH_SHORT).show();
-
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful()){
+                            task.getResult().getMetadata().getReference().getDownloadUrl()
+                                    .addOnCompleteListener(UploadImageActivity.this, new OnCompleteListener<Uri>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Uri> task) {
+                                            if (task.isSuccessful()){
+                                                Glide.with(UploadImageActivity.this)
+                                                        .load(task.getResult().toString())
+                                                        .into(binding.ivImage);
+                                                image = task.getResult().toString();
+                                                Toast.makeText(UploadImageActivity.this, "Upload Berhasil", Toast.LENGTH_SHORT).show();
+                                                System.out.println("gambar 2:" + image);
+                                                if(progressDialog.isShowing()){
+                                                    progressDialog.dismiss();
+                                                    Intent intent = new Intent(UploadImageActivity.this, AddPostActivity.class);
+                                                    startActivity(intent);
+                                                }
+                                            }
+                                        }
+                                    });
+                        }
                     }
                 });
+//                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                        binding.ivImage.setImageURI(null);
+//                        Toast.makeText(UploadImageActivity.this, "Upload Berhasil", Toast.LENGTH_SHORT).show();
+//                        if(progressDialog.isShowing())
+//                            progressDialog.dismiss();
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        if (progressDialog.isShowing())
+//                            progressDialog.dismiss();
+//
+//                        Toast.makeText(UploadImageActivity.this, "Upload gagal", Toast.LENGTH_SHORT).show();
+//
+//                    }
+//                });
     }
 
     private void selectImage(){

@@ -45,6 +45,7 @@ public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHo
                 .load(data.get(pos).getImage())
                 .placeholder(R.drawable.ic_broken_image_24)
                 .into(holder.ivImage);
+        System.out.println("gambar: "+data.get(pos).getImage());
 
         holder.tvDate.setText(post.getCreatedDate());
     }

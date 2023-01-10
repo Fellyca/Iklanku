@@ -40,9 +40,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.github.bumptech.glide:glide:4.13.0'
-    implementation 'com.github.ramseth001:TextDrawable:1.1.6'
-    implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
-    implementation 'com.github.alvinhkh:TextDrawable:'
+//    implementation 'com.github.ramseth001:TextDrawable:1.1.6'
+//    implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+//    implementation 'com.github.alvinhkh:TextDrawable:'
 
     implementation platform('com.google.firebase:firebase-bom:31.1.1')
     implementation 'com.google.firebase:firebase-analytics'
@@ -59,3 +59,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
     annotationProcessor 'com.github.bumptech.glide:glide:4.14.2'
 }
+
